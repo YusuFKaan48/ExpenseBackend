@@ -38,5 +38,16 @@ class User extends Authenticatable
         return $this->hasMany(UserDocument::class);
     }
 
+    public function assignedTasks()
+    {
+        return $this->belongsToMany(Task::class)->withPivot('is_completed')->withTimestamps();
+    }
+
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'creator_id');
+    }
+
+
 }
 

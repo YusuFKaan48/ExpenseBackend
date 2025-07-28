@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Task;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -34,7 +36,7 @@ class UserController extends Controller
 
         if (empty($matches)) {
             return response()->json([
-                'message' => 'Valid TC Kimlik number not found in id_number string.'
+                'message' => 'Valid ID number not found in the id_number string.'
             ], 422);
         }
 
@@ -51,7 +53,6 @@ class UserController extends Controller
         ], 201);
     }
 
-
     public function getUserDocuments(Request $request)
     {
         $user = $request->user();
@@ -62,7 +63,6 @@ class UserController extends Controller
             'documents' => $documents,
         ]);
     }
-
 
     public function uploadPdfs(Request $request)
     {
@@ -97,4 +97,57 @@ class UserController extends Controller
         ], 201);
     }
 
+    public function createTask(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_date' => 'required|string',
+            'end_date' => 'required|string',
+            'user_ids' => 'required|array',
+        ]);
+
+        // Convert ISO 8601 dates to format compatible with Laravel's Carbon
+        $startDate = Carbon::parse($request->start_date)->format('Y-m-d H:i:s');
+        $endDate = Carbon::parse($request->end_date)->format('Y-m-d H:i:s');
+
+        $task = Task::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'creator_id' => auth()->id(),
+        ]);
+
+        $task->assignees()->attach($request->user_ids);
+
+        return response()->json(['message' => 'Task created successfully.']);
+    }
+
+    public function myTasks()
+    {
+        $tasks = auth()->user()
+            ->assignedTasks()
+            ->with('creator')
+            ->get();
+
+        return response()->json(['tasks' => $tasks]);
+    }
+
+    public function completeTask($taskId)
+    {
+        $user = auth()->user();
+
+        $user->assignedTasks()->updateExistingPivot($taskId, [
+            'is_completed' => true,
+        ]);
+
+        return response()->json(['message' => 'Task marked as completed.']);
+    }
+
+    public function allUsers()
+    {
+        $users = \App\Models\User::select('id', 'name')->get();
+        return response()->json(['users' => $users]);
+    }
 }
