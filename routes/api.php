@@ -54,13 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks/{id}/complete', [UserController::class, 'completeTask']);
     Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'allUsers']);
 
-        Route::post('/work/start', [UserController::class, 'startWork']);
-        Route::post('/work/end', [UserController::class, 'endWork']);
-        Route::get('/work/times', [UserController::class, 'getWorkTimes']);
-
-
-
-
+    Route::post('/work/start', [UserController::class, 'startWork']);
+    Route::post('/work/end', [UserController::class, 'endWork']);
+    Route::get('/work/times', [UserController::class, 'getWorkTimes']);
 
     // Get current user details
     Route::get('/me', [UserController::class, 'me']);
