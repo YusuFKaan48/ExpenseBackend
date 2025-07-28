@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\Models\WorkTime;
+
+
 
 class UserController extends Controller
 {
@@ -149,5 +153,56 @@ class UserController extends Controller
     {
         $users = \App\Models\User::select('id', 'name')->get();
         return response()->json(['users' => $users]);
+    }
+
+    public function startWork()
+    {
+        $user = Auth::user();
+        $openSession = WorkTime::where('user_id', $user->id)->whereNull('end_time')->first();
+        if ($openSession) {
+            return response()->json(['message' => 'Work session already started', 'work_time' => $openSession]);
+        }
+
+        $workTime = WorkTime::create([
+            'user_id' => $user->id,
+            'start_time' => now(),
+        ]);
+
+        return response()->json(['work_time' => $workTime]);
+    }
+
+    public function endWork()
+    {
+        $user = Auth::user();
+
+        $workTime = WorkTime::where('user_id', $user->id)
+            ->whereNull('end_time')
+            ->latest()
+            ->first();
+
+        if (!$workTime) {
+            return response()->json(['error' => 'No active work session found'], 404);
+        }
+
+        $endTime = now();
+        $duration = $endTime->diffInSeconds($workTime->start_time);
+
+        $workTime->update([
+            'end_time' => $endTime,
+            'duration_seconds' => $duration,
+        ]);
+
+        return response()->json(['work_time' => $workTime]);
+    }
+
+    public function getWorkTimes()
+    {
+        $user = Auth::user();
+
+        $workTimes = WorkTime::where('user_id', $user->id)
+            ->orderBy('start_time', 'desc')
+            ->get();
+
+        return response()->json(['work_times' => $workTimes]);
     }
 }
