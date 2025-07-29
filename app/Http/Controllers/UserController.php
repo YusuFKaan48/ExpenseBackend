@@ -8,8 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\WorkTime;
 
-
-
 class UserController extends Controller
 {
     public function me(Request $request)
@@ -111,7 +109,6 @@ class UserController extends Controller
             'user_ids' => 'required|array',
         ]);
 
-        // Convert ISO 8601 dates to format compatible with Laravel's Carbon
         $startDate = Carbon::parse($request->start_date)->format('Y-m-d H:i:s');
         $endDate = Carbon::parse($request->end_date)->format('Y-m-d H:i:s');
 
@@ -158,6 +155,7 @@ class UserController extends Controller
     public function startWork()
     {
         $user = Auth::user();
+
         $openSession = WorkTime::where('user_id', $user->id)->whereNull('end_time')->first();
         if ($openSession) {
             return response()->json(['message' => 'Work session already started', 'work_time' => $openSession]);
@@ -185,7 +183,7 @@ class UserController extends Controller
         }
 
         $endTime = now();
-        $duration = $endTime->diffInSeconds($workTime->start_time);
+        $duration = abs($endTime->diffInSeconds($workTime->start_time));
 
         $workTime->update([
             'end_time' => $endTime,

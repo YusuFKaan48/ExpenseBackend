@@ -20,9 +20,6 @@ Route::get('/', function () {
     ]);
 });
 
-// Data operations
-Route::get('/data', [DataController::class, 'index']);
-
 // ID card upload
 Route::post('/idcard', [IdCardController::class, 'store']);
 
