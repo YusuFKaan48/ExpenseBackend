@@ -15,11 +15,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'addressName',
-        'relative_name',
-        'relative_number',
-        'jobTitle',
-        'id_number',
     ];
 
 
@@ -27,27 +22,5 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-    public function IdCard()
-    {
-        return $this->hasOne(IdCard::class);
-    }
-
-    public function documents()
-    {
-        return $this->hasMany(UserDocument::class);
-    }
-
-    public function assignedTasks()
-    {
-        return $this->belongsToMany(Task::class)->withPivot('is_completed')->withTimestamps();
-    }
-
-    public function createdTasks()
-    {
-        return $this->hasMany(Task::class, 'creator_id');
-    }
-
-
 }
 
