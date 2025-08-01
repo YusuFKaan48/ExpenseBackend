@@ -3,25 +3,28 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 
 
-// Protected routes
+Route::post('/login', [AuthController::class, 'login']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Get authenticated user info
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
-    // Get user profile
+    Route::get('/me', [UserController::class, 'me']);
+
     Route::get('/profile', function (Request $request) {
         return response()->json([
             'user' => $request->user()
         ]);
     });
 
-    // Get current user details
-    Route::get('/me', [UserController::class, 'me']);
+
+
 
 });
 
