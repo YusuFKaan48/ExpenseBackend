@@ -8,7 +8,6 @@ use App\Http\Controllers\AuthController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', function (Request $request) {
@@ -21,10 +20,18 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json([
             'user' => $request->user()
         ]);
+
     });
 
-
-
+    Route::get('/user/categories', [UserController::class, 'categories']);
+    Route::post('/user/categories', [UserController::class, 'addCategory']);
+    Route::post('/transaction', [UserController::class, 'addTransaction']);
+    Route::get('/transactions', [UserController::class, 'transactions']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user/currencies', [UserController::class, 'getCurrencies']);
+    Route::post('/user/currencies', [UserController::class, 'addCurrency']);
+    Route::get('/transactions/{id}', [UserController::class, 'getTransaction']);
+    Route::put('/transactions/{id}', [UserController::class, 'updateTransaction']);
 
 });
 
